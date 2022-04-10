@@ -14,7 +14,7 @@ Parse a Verilog netlist using the closed source parser:
 :Parse
 :ParseAll
 ```
-The parser is an binary compatible with x86_64 Linux distros with kernel > = 2.6.32. *:Parse* just extracts the user-defined Verilog modules and instances; whereas *:ParseAll* extracts everything.
+The parser is a binary compatible with x86_64 Linux distros with kernel > = 2.6.32. *:Parse* just extracts the user-defined Verilog modules and instances; whereas *:ParseAll* extracts everything.
 
 Show the information of the module under the cursor:
 ```
