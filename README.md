@@ -40,3 +40,5 @@ Show the hierarchy of the design:
 ```
 :Hier
 ```
+
+Thanks @ZhukovAlexander for his [Python skiplist library](https://github.com/ZhukovAlexander/py-skiplist).
