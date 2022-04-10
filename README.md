@@ -1,5 +1,7 @@
 # Birdie                                                                                                                             
 A Vim plugin that facilitates Verilog netlist tracing. It is called Birdie because this name sounds like the commercial tool V\*\*d\*, and the user can hop like a bird going from one place to another in the Verilog netlist forrest.
+
+![Birdie in action](https://github.com/tklam/birdie/blob/9f1e6b2807c2ab9fd65dd180b792acf6172794e6/birdie.gif)
   
 ## Installation
 Just :source the given vim_plugin/birdie.vim
