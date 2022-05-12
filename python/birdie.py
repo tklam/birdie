@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
+# #!/usr/bin/env python2
 
-# python3 is actually preferred. But people living in the dark age have not even heard about python3.
+# # python3 is actually preferred. But people living in the dark age have not even heard about python3.
 
 
 from __future__ import print_function

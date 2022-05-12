@@ -3,9 +3,17 @@ let s:plugin_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let g:birdie_info_buffer_name = "birdie_info"
 let g:birdie_one_module_buffer_name = "birdie_one_module"
 
+if has("python3")
+    command! -nargs=1 Py py3 <args>
+    let s:python_command = "python3"
+else
+    command! -nargs=1 Py py <args>
+    let s:python_command = "python"
+endif
+
 " init the plugin
 "-----------------------------------------------------------------
-python << EOF
+Py << EOF
 from __future__ import print_function
 import sys
 from os.path import normpath, join
@@ -25,7 +33,7 @@ EOF
 
 "-----------------------------------------------------------------
 function! birdie#hello()
-py birdie.hello()
+Py birdie.hello()
 endfunction
 
 
@@ -73,8 +81,8 @@ if l:matched_win_nr == -1
 else
     call birdie#go_to_window(l:matched_win_nr)
 endif
-py << EOF
-if vim.eval('a:window_size') > 0:
+Py << EOF
+if int(vim.eval('a:window_size')) > 0:
     vim.command('resize {0}'.format(vim.eval('a:window_size')))
 EOF
 " This piece of Vim script doesn't work in Neovim 0.3.4
@@ -100,7 +108,7 @@ function! birdie#parse_current_verilog(limit_to_use_defined_modules)
 let l:cur_file_path = expand('%:p')
 echom "Parsing " . l:cur_file_path
 echom " show only user defined modules? " . a:limit_to_use_defined_modules
-py birdie.parse_verilog(vim.eval('l:cur_file_path'), vim.eval('a:limit_to_use_defined_modules'))
+Py birdie.parse_verilog(vim.eval('l:cur_file_path'), vim.eval('a:limit_to_use_defined_modules'))
 echom "Done"
 call birdie#tidy_db() " XXX TODO Ugly
 endfunction
@@ -113,7 +121,7 @@ function! birdie#show_current_module_info()
 let l:cur_file_path = expand('%:p')
 let l:cur_line_number = line('.')
 echom "Getting the module that we are in:" . l:cur_file_path . ' line: ' . l:cur_line_number
-python << EOF
+Py << EOF
 v_module = birdie.get_module_by_line_number(vim.eval('l:cur_file_path'), vim.eval('l:cur_line_number'))
 if v_module is not None:
     print('Current module: {0}'.format(v_module._module_name))
@@ -131,7 +139,7 @@ command! -nargs=0 Module call birdie#show_current_module_info()
 function! birdie#go_to_module_by_name(module_name)
 let l:found_module = 0
 echom "Hopping to the definition of module: " . a:module_name
-py << EOF
+Py << EOF
 candidate_module_names, v_module = birdie.get_module_by_name(vim.eval('a:module_name'))
 if v_module is not None:
     vim.command('let l:found_module = 1')
@@ -154,7 +162,7 @@ endfunction
 function! birdie#go_to_module_by_instance_path(instance_path)
 let l:found_module = 0
 echom "Hopping to the definition of module with instance path: " . a:instance_path
-py << EOF
+Py << EOF
 candidate_instance_paths, v_module = birdie.get_module_by_instance_path(vim.eval('a:instance_path'))
 if v_module is not None:
     vim.command('let l:found_module = 1')
@@ -190,7 +198,7 @@ let l:target_instance_name = ""
 let l:target_instance_name_line_number = 0
 echom "Hopping to the declaration of instance: " . a:instance_path
 
-py << EOF
+Py << EOF
 path_segments = vim.eval('a:instance_path').split('/')
 vim.command('let l:parent_module_instance_path = "{0}"'.format('/'.join(path_segments[0:-1])))
 vim.command('let l:target_instance_name = "{0}"'.format(path_segments[-1]))
@@ -199,7 +207,7 @@ EOF
 echom "  parent module/instance: " . l:parent_module_instance_path
 echom "  target instance: " . l:target_instance_name
 
-py << EOF
+Py << EOF
 # an item in candidate_instance_paths can be the name of the top module or an instance path
 parent_module_or_path = vim.eval('l:parent_module_instance_path')
 candidate_instance_paths, v_module = birdie.get_module_by_name(parent_module_or_path)
@@ -237,7 +245,7 @@ command! -nargs=1 GotoInstance call birdie#go_to_instance(<f-args>)
 function! birdie#extract_single_module(module_name)
 let l:found_module = 0
 echom "Extracting the definition of " . a:module_name
-py << EOF
+Py << EOF
 candidate_module_names, v_module = birdie.get_module_by_name(vim.eval('a:module_name'))
 if v_module is not None:
     vim.command('let l:found_module = 1')
@@ -267,7 +275,7 @@ command! -nargs=1 OneModule call birdie#extract_single_module(<f-args>)
 "-----------------------------------------------------------------
 function! birdie#print_hierarchy()
 let l:hier_content = ""
-py << EOF
+Py << EOF
 vim.command('call birdie#create_or_open_window("{0}", "{1}", 10)'.format('rightbelow', vim.eval('g:birdie_info_buffer_name')))
 vim.command('call birdie#replace_buffer_content("{0}", "{1}")'
         .format(vim.eval('g:birdie_info_buffer_name'), birdie.get_design_hierarchy_str()))
@@ -279,7 +287,7 @@ command! -nargs=0 Hierarchy call birdie#print_hierarchy()
 
 "-----------------------------------------------------------------
 function! birdie#tidy_db()
-py << EOF
+Py << EOF
 birdie.tidy_db()
 EOF
 endfunction

@@ -33,12 +33,12 @@ class VerilogModule:
             s.append('    {0}'.format(i))
         s.append('  submodule instances:')
         for i in self._submodules:
-            s.append('    <{0}> {1}'.format(i[1], i[0]))
+            s.append('    {0} <{1}>'.format(i[0], i[1]))
         return '\n'.join(s)
 
 
 def recursive_traverse_sub_instances(level, instance_path_2_module, cur_module, cur_path, callback_obj):
-    callback_obj.hierarchy_print_module(cur_module, ' ' * level + cur_path)
+    callback_obj.hierarchy_print_module(cur_module, str(level) + ' ' * (level-len(str(level))+1) + cur_path)
     for sub_instance_path, _ in cur_module._submodules:
         child_path = cur_path + '/' + sub_instance_path 
         if child_path not in instance_path_2_module:
@@ -60,5 +60,5 @@ class HierPrint:
         if module._is_top:
             self.buffer.append(module._module_name)
         else:
-            self.buffer.append(' <{0}> {1}'.format(module._module_name, path))
+            self.buffer.append(' {0} <{1}>'.format(path, module._module_name))
 

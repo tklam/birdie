@@ -8,6 +8,12 @@ from threading import Lock
 
 from .iterators import geometric
 
+try:
+    from collections.abc import MutableMapping
+except:
+    from collections import MutableMapping
+
+import functools
 
 class NIL(object):
     """Sentinel object that always compares greater than another object"""
@@ -94,7 +100,7 @@ class SkiplistAbstractBase:
         for level in reversed(range(height)):
             node = next(
                 dropwhile(
-                    lambda node_: node_.nxt[level].key <= key,
+                    lambda node_: node_.nxt[level].key is not None and key is not None and node_.nxt[level].key <= key,
                     chain([self.head], self._level(node, level))
                 )
             )
@@ -149,7 +155,7 @@ class SkiplistAbstractBase:
         del node
 
 
-class Skiplist(SkiplistAbstractBase, collections.MutableMapping):
+class Skiplist(SkiplistAbstractBase, MutableMapping):
 
     def _remove(self, key):
         super(Skiplist, self)._remove(key)
