@@ -1,0 +1,138 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@0.2.1
+  py: nic30/python-all-in-1@0.3.0
+
+jobs:
+  install-test-coverage:
+    # executor: python/default
+    resource_class: medium
+    docker:
+      - image: ubuntu:rolling
+    steps:
+      - checkout
+      - run:
+          command: |
+            apt update
+            # because of tzdata
+            export DEBIAN_FRONTEND=noninteractive
+            export TZ=America/USA
+            apt update
+            apt install -y build-essential libantlr4-runtime-dev antlr4 cmake ninja-build python3-pip python3-dev python3 python3-pip python3-venv git lcov rubygems
+            python3 -m venv venv
+            echo "source $PWD/venv/bin/activate" >> $BASH_ENV
+            echo 'export SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_BUILD_TYPE:STRING=Debug -DCODE_COVERAGE=ON"' >> $BASH_ENV
+            # because we do not have enough RAM
+            echo 'export SKBUILD_BUILD_OPTIONS="-j1"' >> $BASH_ENV
+            source $BASH_ENV
+
+
+      - run:
+          command: |
+            update-alternatives --install /usr/bin/python python /usr/bin/python3 10;
+            update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10;
+
+      - run: git submodule sync
+      - run: git submodule update --init
+      # - python/load-cache
+
+      - run:
+          command: |
+            gcc -v;
+            python --version;
+            cmake --version;
+            free;
+
+      - run: pip install jupyter
+      - run: gem install coveralls-lcov
+      #- run:
+      #    command: |
+      #      echo export CXXFLAGS=\"$CXXFLAGS --param ggc-min-expand=1 --param ggc-min-heapsize=32768\" >> "$BASH_ENV"
+      - py/install-setup-py:
+          rm-package-dir: true
+          build-args: "--verbose"
+      # - python/save-cache
+      - py/test-and-coverage:
+          coverage: false
+      - run:
+          name: Filter lcov outputs for scikit-build and upload it to coveralls.io
+          command: |
+              if [ -d "removed_because_of_coverage_$MODULE_NAME" ]; then
+                 mv "removed_because_of_coverage_$MODULE_NAME" $MODULE_NAME;
+              fi
+              if  [ -z "$CIRCLE_PULL_REQUEST" ]; then
+                 lcov --compat-libtool --directory . --capture --output-file coverage.info.raw;
+                 lcov --remove coverage.info.raw -o coverage.info '/usr/*' '*_skbuild/*';
+                 sed -i 's/\/root\/project\///g' coverage.info;
+                 sed -i 's/\/root\///g' coverage.info;
+                 coveralls-lcov coverage.info --repo-token ${COVERALLS_REPO_TOKEN};
+              else
+                 echo "[INFO] Skipping the coverage upload because this is a pull request $CIRCLE_PULL_REQUEST"
+              fi
+
+  install-test-deploy:
+    # executor: python/default
+    resource_class: medium
+    docker:
+      - image: ubuntu:rolling
+    steps:
+      - checkout: {}
+      - run:
+          command: |
+            apt update
+            # because of tzdata
+            export DEBIAN_FRONTEND=noninteractive
+            export TZ=America/USA
+            apt update
+            apt install -y build-essential libantlr4-runtime-dev antlr4 cmake ninja-build python3-pip python3-dev python3 python3-pip python3-venv git lcov rubygems
+            python3 -m venv venv
+            echo "source $PWD/venv/bin/activate" >> $BASH_ENV
+            # because we do not have enough RAM
+            echo 'export SKBUILD_BUILD_OPTIONS="-j1"' >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          command: |
+            update-alternatives --install /usr/bin/python python /usr/bin/python3 10;
+            update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10;
+
+      - run: git submodule sync
+      - run: git submodule update --init
+      # - python/load-cache
+
+      - run:
+          command: |
+            gcc -v;
+            python --version;
+            cmake --version;
+            free;
+
+      - run: pip install jupyter
+      - run: gem install coveralls-lcov
+      #- run:
+      #    command: |
+      #      echo export CXXFLAGS=\"$CXXFLAGS --param ggc-min-expand=1 --param ggc-min-heapsize=32768\" >> "$BASH_ENV"
+      - py/install-setup-py:
+          rm-package-dir: true
+          build-args: "--verbose"
+      # - python/save-cache
+      - py/test-and-coverage:
+          coverage: false
+      - py/deploy-pypi-on-tag:
+          bin: false
+
+workflows:
+  main:
+    jobs:
+      - install-test-coverage:
+          filters:
+            tags:
+              only: /.*/
+      - install-test-deploy:
+          requires:
+            - install-test-coverage
+          context:
+            - pypi
+          filters:
+            tags:
+              only: /.*/

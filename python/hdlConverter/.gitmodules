@@ -1,0 +1,22 @@
+[submodule "ivtest"]
+	path = tests/ivtest
+	url = https://github.com/steveicarus/ivtest
+	branch = master
+[submodule "yosys"]
+	path = tests/yosys
+	url = https://github.com/YosysHQ/yosys.git
+	branch = master
+[submodule "verilator"]
+	path = tests/verilator
+	url = http://git.veripool.org/git/verilator
+	branch = master
+[submodule "vunit"]
+	path = tests/vunit
+	url = https://github.com/VUnit/vunit.git
+	branch = master
+[submodule "ghdl"]
+	path = tests/ghdl
+	url = https://github.com/ghdl/ghdl.git
+[submodule "UVVM"]
+	path = tests/UVVM
+	url = https://github.com/UVVM/UVVM.git
