@@ -1,2 +1,0 @@
-`define home(filename) `"empty.txt`"
-`include `home(myfile)

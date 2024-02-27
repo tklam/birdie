@@ -110,7 +110,6 @@ echom "Parsing " . l:cur_file_path
 echom " show only user defined modules? " . a:limit_to_use_defined_modules
 Py birdie.parse_verilog(vim.eval('l:cur_file_path'), vim.eval('a:limit_to_use_defined_modules'))
 echom "Done"
-call birdie#tidy_db() " XXX TODO Ugly
 endfunction
 command! -nargs=0 Parse call birdie#parse_current_verilog(1)
 command! -nargs=0 ParseAll call birdie#parse_current_verilog(0)
@@ -120,6 +119,7 @@ command! -nargs=0 ParseAll call birdie#parse_current_verilog(0)
 function! birdie#show_current_module_info()
 let l:cur_file_path = expand('%:p')
 let l:cur_line_number = line('.')
+let l:prev_window=birdie#get_window_by_buf_name(l:cur_file_path)
 echom "Getting the module that we are in:" . l:cur_file_path . ' line: ' . l:cur_line_number
 Py << EOF
 v_module = birdie.get_module_by_line_number(vim.eval('l:cur_file_path'), vim.eval('l:cur_line_number'))
@@ -131,6 +131,7 @@ if v_module is not None:
 else:
     print('Current module: None')
 EOF
+call birdie#go_to_window(l:prev_window)
 endfunction
 command! -nargs=0 Module call birdie#show_current_module_info()
 
@@ -253,11 +254,11 @@ if v_module is not None:
     print('  {0}'.format(candidate_module_names[0]))
     vim.command('b {0}'.format(v_module._file_path))
     vim.command('{0},{1}y'.format(v_module._file_begin_line_number, v_module._file_end_line_number))
-    vim.command('call birdie#create_or_open_window("{0}", "{1}", -1)'.format('vertical rightbelow', vim.eval('g:birdie_one_module_buffer_name')))
+    vim.command('call birdie#create_or_open_window("{0}", "{1}.{2}", -1)'.format('vertical rightbelow', vim.eval('g:birdie_one_module_buffer_name'), candidate_module_names[0]))
     header = '// {0} from line {1} to {2}: {3}'.format(
             v_module._file_path, v_module._file_begin_line_number, v_module._file_end_line_number, v_module._module_name) 
     vim.command('call birdie#replace_buffer_content("{0}", "{1}")'.format(vim.eval('g:birdie_one_module_buffer_name'), header))
-    vim.command('normal p')
+    vim.command('normal "0p')
 else:
     if len(candidate_module_names) == 0:
         print('Cannot find module with module name {0}.'.format(vim.eval('a:module_name')))
@@ -282,17 +283,6 @@ vim.command('call birdie#replace_buffer_content("{0}", "{1}")'
 EOF
 endfunction
 command! -nargs=0 Hierarchy call birdie#print_hierarchy()
-
-
-
-"-----------------------------------------------------------------
-function! birdie#tidy_db()
-Py << EOF
-birdie.tidy_db()
-EOF
-endfunction
-command! -nargs=0 TidyModuleDB call birdie#tidy_db()
-
 
 
 "-----------------------------------------------------------------

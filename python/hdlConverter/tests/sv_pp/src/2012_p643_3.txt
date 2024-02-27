@@ -1,6 +1,0 @@
-`define HI Hello
-`define LO "`HI, world"
-`define H(x) "Hello, x"
-"`HI, world"
-`LO
-`H(world)

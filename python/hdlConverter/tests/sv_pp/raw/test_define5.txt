@@ -1,3 +1,0 @@
-`define macro(a) a\
-                 +\
-                 a

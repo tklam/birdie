@@ -1,2 +1,0 @@
-"transitive-1"
-`include "../transitive-2.txt"

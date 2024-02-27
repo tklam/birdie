@@ -1,3 +1,0 @@
-`wordsize data;
-logic [1:`wordsize] data;
-
