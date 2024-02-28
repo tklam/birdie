@@ -9,12 +9,15 @@ A Vim plugin that facilitates Verilog netlist tracing. It is called Birdie becau
 pip install hdlConvertor
 ```
 
-If you cannot acces the network, you can install using the included official Python Egg file:
+If you cannot acces the network, you can install using the included Python Wheel file converted from
+the [official Egg
+file](https://files.pythonhosted.org/packages/b8/dc/994c28ffa5a6a9d5a83baa630ce8b6da1da92abcd83ed582b83c7b5eb104/hdlConvertor-2.3-py3.8-linux-x86_64.egg):
 
 ```
-pip install python/hdlConverter/hdlConvertor-2.3-py3.8-linux-x86_64.egg
+pip install python/hdlConverter/hdlConvertor-2.3-py38-cp38-linux_x86_64.whl
+# If the above command does not work, try using the the following build
+pip install python/hdlConverter/hdlConvertor-2.3-cp311-cp311-linux_x86_64.whl
 ```
-
 
 ### Vim
 Just :source the given vim_plugin/birdie.vim
